@@ -1,7 +1,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_err.h"
 #include "esp_log.h"
 #include "driver/i2s.h"
+#include "driver/adc.h"
 #include "esp_adc_cal.h"
 
 static const char *TAG = "main";
@@ -11,11 +13,11 @@ static const char *TAG = "main";
 // i2s number
 #define EXAMPLE_I2S_NUM (0)
 // i2s sample rate
-#define EXAMPLE_I2S_SAMPLE_RATE (16000)
+#define EXAMPLE_I2S_SAMPLE_RATE (44100)
 // i2s data bits
 #define EXAMPLE_I2S_SAMPLE_BITS (16)
 // enable display buffer for debug
-#define EXAMPLE_I2S_BUF_DEBUG (0)
+#define EXAMPLE_I2S_BUF_DEBUG (1)
 // I2S read buffer length
 #define EXAMPLE_I2S_READ_LEN (16 * 1024)
 // I2S data format
@@ -149,7 +151,7 @@ void example_i2s_adc_dac(void *arg)
     {
         // read data from I2S bus, in this case, from ADC.
         i2s_read(EXAMPLE_I2S_NUM, (void *)i2s_read_buff, i2s_read_len, &bytes_read, portMAX_DELAY);
-        example_disp_buf((uint8_t *)i2s_read_buff, 64);
+        example_disp_buf(i2s_read_buff, 64);
 
         // i2s_adc_disable(EXAMPLE_I2S_NUM);
         // free(i2s_read_buff);
@@ -186,6 +188,6 @@ esp_err_t app_main(void)
     example_i2s_init();
     esp_log_level_set("I2S", ESP_LOG_INFO);
     xTaskCreate(example_i2s_adc_dac, "example_i2s_adc_dac", 1024 * 2, NULL, 5, NULL);
-    xTaskCreate(adc_read_task, "ADC read task", 2048, NULL, 5, NULL);
+    // xTaskCreate(adc_read_task, "ADC read task", 2048, NULL, 5, NULL);
     return ESP_OK;
 }
